@@ -1,0 +1,68 @@
+package utils
+
+import scala.scalajs.js
+
+object JsonUtils {
+
+  def isJson(str: String): Boolean = {
+    try {
+      js.JSON.parse(str)
+      true
+    } catch {
+      case e: Exception => false
+    }
+  }
+
+  def toJson(keys: Iterable[String], values: Array[Any]): String = {
+    var json = "{"
+    var i = 0
+    for (k <- keys) {
+      val value = values(i)
+      if (value.toString.startsWith("{")) { // document
+        json += "\"%s\":%s,".format(k, value)
+      } else {
+        json += "\"%s\":\"%s\",".format(k, values(i))
+      }
+      i = i + 1
+    }
+    json = json.substring(0, json.length - 1)
+    json += "}"
+    json
+  }
+
+  def toJsonPart(keys: Iterable[String], values: Iterable[Any]): String = {
+    var json = ""
+    val valuesIterator = values.iterator
+    for (k <- keys) {
+      json += "\"%s\":\"%s\",".format(k, valuesIterator.next())
+    }
+    json = json.substring(0, json.length - 1)
+    json
+  }
+
+  def toJsonArrPart(key: String, items: Seq[Any]): String = {
+    if (items.isEmpty) {
+      "\"%s\":[]".format(key)
+    }  else if (items.head.toString.startsWith("{")) { // documents
+      val json = "\"%s\":[%s]".format(key, items.mkString(","))
+      json
+    } else {
+      val json = "\"%s\":[\"%s\"]".format(key, items.mkString("\",\""))
+      json
+    }
+  }
+
+  def toJsonArrPartInt(key: String, items: Seq[Int]): String = {
+    if (items.isEmpty) {
+      "\"%s\":[]".format(key)
+    }  else {
+      val json = "\"%s\":[%s]".format(key, items.mkString(","))
+      json
+    }
+  }
+
+  def toJson(jsonParts: Seq[String]): String = {
+    "{%s}".format(jsonParts.mkString(","))
+  }
+
+}
